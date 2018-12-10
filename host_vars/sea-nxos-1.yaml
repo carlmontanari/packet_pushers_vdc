@@ -1,0 +1,56 @@
+features:
+  - ospf
+  - bgp
+
+router_id: 10.255.255.1
+
+ethernet_interfaces:
+  Ethernet1/1:
+    description: sea-nxos-1 Mgmt
+    state: no shutdown
+    routed:
+      ip: 10.0.1.102/24
+    access: False
+    trunk: False
+  Ethernet1/2:
+    description: sea-eos-1 Eth2
+    state: no shutdown
+    routed:
+      ip: 10.255.254.0/31
+    access: False
+    trunk: False
+  Ethernet1/3:
+    description: sea-eos-1 Eth3
+    state: no shutdown
+    routed:
+      ip: 10.255.254.2/31
+    access: False
+    trunk: False
+
+loopback_interfaces:
+  Loopback0:
+    description: sea-nxos-1 Loopback
+    state: no shutdown
+    routed:
+      ip: 10.255.255.1/32
+
+ospf_interfaces:
+  ospf_Ethernet1/2:
+    passive: false
+    area: 0.0.0.0
+    type: point-to-point
+  ospf_Ethernet1/3:
+    passive: false
+    area: 0.0.0.0
+    type: point-to-point
+  ospf_Loopback0:
+    passive: true
+    area: 0.0.0.0
+
+bgp_ipv4_unicast:
+  networks:
+    - 10.255.0.1/32
+  neighbors:
+    10.255.255.2:
+      remote-as: 65535
+      update-source: loopback0

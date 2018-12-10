@@ -1,0 +1,8 @@
+{% for interface, attrs in loopback_interfaces.items() %}
+interface {{ interface }}
+  description {{ attrs['description'] }}
+{% if attrs['routed'] %}
+  ip address {{ attrs['routed']['ip'] }}
+{% endif %}
+!
+{% endfor %}

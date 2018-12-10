@@ -1,0 +1,65 @@
+---
+- name: Ensure Configs Directory Preset
+  connection: local
+  hosts: localhost
+  gather_facts: no
+  tags: always
+  tasks:
+    - file:
+        path: backup/
+        state: directory
+
+- name: Backup Cisco NXOS Configurations
+  connection: local
+  hosts: cisco-nxos
+  gather_facts: no
+  tags: nxos
+  vars:
+    nxos_rollback_creds:
+      host: "{{ ansible_host }}"
+      username: "{{ username }}"
+      password: "{{ password }}"
+      transport: "{{ napalm_network_os }}"
+      port: "{{ nxapi_port }}"
+      use_ssl: yes
+      validate_certs: no
+    napalm_creds:
+      hostname: "{{ ansible_host }}"
+      username: "{{ username }}"
+      password: "{{ password }}"
+      dev_os: "{{ napalm_network_os }}"
+      optional_args:
+        port: "{{ nxapi_port }}"
+  tasks:
+    - nxos_rollback:
+        provider: "{{ nxos_rollback_creds }}"
+        checkpoint_file: my_net_as_code_checkpoint
+    - napalm_get_facts:
+        provider: "{{ napalm_creds }}"
+        filter: "config"
+      register: config
+    - copy:
+        content: "{{ config['ansible_facts']['napalm_config']['running'] }}"
+        dest: "backup/{{ inventory_hostname }}_config"
+
+- name: Backup Arista EOS Configurations
+  connection: local
+  hosts: arista-eos
+  gather_facts: no
+  tags: eos
+  vars:
+    napalm_creds:
+      hostname: "{{ ansible_host }}"
+      username: "{{ username }}"
+      password: "{{ password }}"
+      dev_os: "{{ napalm_network_os }}"
+      optional_args:
+        port: "{{ eapi_port }}"
+  tasks:
+    - napalm_get_facts:
+        provider: "{{ napalm_creds }}"
+        filter: "config"
+      register: config
+    - copy:
+        content: "{{ config['ansible_facts']['napalm_config']['running'] }}"
+        dest: "backup/{{ inventory_hostname }}_config"

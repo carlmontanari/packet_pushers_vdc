@@ -1,0 +1,104 @@
+---
+- name: Validate sea-nxos-1
+  connection: local
+  hosts: sea-nxos-1
+  gather_facts: no
+  tags: nxos
+  vars:
+    nxos_creds:
+      host: "{{ ansible_host }}"
+      username: "{{ username }}"
+      password: "{{ password }}"
+      use_ssl: yes
+      validate_certs: no
+      transport: "{{ napalm_network_os }}"
+      port: "{{ nxapi_port }}"
+  tasks:
+    - name: sea-nxos-1 ospf peer eth1/2
+      nxos_command:
+        provider: "{{ nxos_creds }}"
+        commands:
+          - command: show ip ospf neighbors e1/2
+            output: json
+      register: ospf_output
+      failed_when: "'FULL' not in ospf_output['stdout'][0]['TABLE_ctx']['ROW_ctx']['TABLE_nbr']['ROW_nbr']['state']"
+      tags: ospf
+    - name: sea-nxos-1 ospf peer eth1/3
+      nxos_command:
+        provider: "{{ nxos_creds }}"
+        commands:
+          - command: show ip ospf neighbors e1/3
+            output: json
+      register: ospf_output
+      failed_when: "'FULL' not in ospf_output['stdout'][0]['TABLE_ctx']['ROW_ctx']['TABLE_nbr']['ROW_nbr']['state']"
+      tags: ospf
+
+    - name: sea-nxos-1 bgp peer to sea-eos1
+      nxos_command:
+        provider: "{{ nxos_creds }}"
+        commands:
+          - command: show ip bgp neighbors 10.255.255.2
+            output: text
+      register: bgp_output
+      failed_when: "'BGP state = Established' not in bgp_output['stdout'][0]"
+      tags: bgp
+
+    - name: sea-nxos-1 reachability to sea-eos1
+      nxos_ping:
+        provider: "{{ nxos_creds }}"
+        dest: 10.255.255.2
+        source: 10.255.255.1
+        vrf: default
+      tags: reachability
+
+- name: Validate sea-eos-1
+  connection: local
+  hosts: sea-eos-1
+  gather_facts: no
+  vars:
+    eos_creds:
+      host: "{{ ansible_host }}"
+      username: "{{ username }}"
+      password: "{{ password }}"
+      use_ssl: yes
+      validate_certs: no
+      transport: "eapi"
+      port: "{{ eapi_port }}"
+  tasks:
+    - name: sea-eos-1 ospf peer eth2
+      eos_command:
+        provider: "{{ eos_creds }}"
+        commands:
+          - command: show ip ospf neighbor eth2
+            output: json
+      register: ospf_output
+      failed_when: "'full' not in ospf_output['stdout_lines'][0]['vrfs']['default']['instList']['1']['ospfNeighborEntries'][0]['adjacencyState']"
+      tags: ospf
+    - name: sea-eos-1 ospf peer eth3
+      eos_command:
+        provider: "{{ eos_creds }}"
+        commands:
+          - command: show ip ospf neighbor eth3
+            output: json
+      register: ospf_output
+      failed_when: "'full' not in ospf_output['stdout_lines'][0]['vrfs']['default']['instList']['1']['ospfNeighborEntries'][0]['adjacencyState']"
+      tags: ospf
+
+    - name: sea-eos-1 bgp peer to sea-nxos-1
+      eos_command:
+        provider: "{{ eos_creds }}"
+        commands:
+          - command: show ip bgp neighbors 10.255.255.1
+            output: json
+      register: bgp_output
+      failed_when: "'Established' not in bgp_output['stdout'][0]['vrfs']['default']['peerList'][0]['state']"
+      tags: bgp
+
+    - name: sea-eos-1 reachability to sea-nxos-1
+      eos_command:
+        provider: "{{ eos_creds }}"
+        commands:
+          - command: ping 10.255.255.1 source 10.255.255.2
+      tags: reachability
+      register: ping_output
+      failed_when: "'5 packets transmitted, 5 received' not in ping_output['stdout'][0]['messages'][0]"

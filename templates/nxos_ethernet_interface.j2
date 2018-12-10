@@ -1,0 +1,17 @@
+{% for interface, attrs in ethernet_interfaces.items() %}
+interface {{ interface }}
+  description {{ attrs['description'] }}
+{% if attrs['routed'] %}
+  no switchport
+  ip address {{ attrs['routed']['ip'] }}
+{% if 'ospf_' + interface in ospf_interfaces.keys() and not ospf_interfaces['ospf_' + interface]['passive'] %}
+  ip ospf dead-interval {{ ospf_dead }}
+  ip ospf hello-interval {{ ospf_hello }}
+  no ip ospf passive-interface
+  ip router ospf {{ ospf_proc_id }} area {{ ospf_interfaces['ospf_' + interface]['area'] }}
+  ip ospf network {{ ospf_interfaces['ospf_' + interface]['type'] }}
+{% endif %}
+{% endif %}
+  {{ attrs['state'] }}
+
+{% endfor %}

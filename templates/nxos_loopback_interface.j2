@@ -1,0 +1,12 @@
+{% for interface, attrs in loopback_interfaces.items() %}
+interface {{ interface }}
+  description {{ attrs['description'] }}
+{% if attrs['routed'] %}
+  ip address {{ attrs['routed']['ip'] }}
+{% if 'ospf_' + interface in ospf_interfaces.keys() %}
+  ip router ospf 1 area {{ ospf_interfaces['ospf_' + interface]['area'] }}
+{% endif %}
+{% endif %}
+  {{ attrs['state'] }}
+
+{% endfor %}

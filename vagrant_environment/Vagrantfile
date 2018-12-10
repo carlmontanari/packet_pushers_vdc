@@ -1,0 +1,205 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+devices=[
+  {
+    # Box, hostname for box
+    :box => "carlniger/nxos-base",
+    :hostname => "nxos",
+    # Specifically for NX-OS; set the config.ssh.shell to be "run bash"
+    :ssh_shell => "run bash",
+    # Sync SSH true|false, sync folder DISABLE true|false
+    :sync_ssh => false,
+    :sync_folder_disable => true,
+    # Static SSH port to make Ansible inventory even easier
+    :ssh_port => '2202',
+    # Enable or disable vbox auto_update true|false
+    :auto_update => false,
+    # Define serial port
+    :serialport => [{
+      :serialportnum => "2002",
+    }],
+    # Define hardware; mem/cpu
+    :memory => '6142',
+    :cpu => '1',
+    # Management NIC type
+    :mgmt_nic_type => '82540EM',
+    # Define NICs, network name/type
+    :networks => [{
+      :network_name => 'int_mgmt',
+      :nic_type => '82540EM',
+      :nic_id => '--nicpromisc2',
+      :promiscuous => 'allow-all',
+    },{
+      :network_name => 'eos_nxos1',
+      :nic_type => '82540EM',
+      :nic_id => '--nicpromisc3',
+      :promiscuous => 'allow-all',
+    },{
+      :network_name => 'eos_nxos2',
+      :nic_type => '82540EM',
+      :nic_id => '--nicpromisc4',
+      :promiscuous => 'allow-all',
+    }],
+    # Forwarded Ports
+    :fwd_ports => [{
+      :guest => 22,
+      :host => 2202,
+      :id => 'override_ssh',
+    },{
+      :guest => 444,
+      :host => 2302,
+      :id => 'NXAPI'
+    }]
+  },
+  {
+    # Box, hostname for box
+    :box => "carlniger/eos-base",
+    :hostname => "veos",
+    # Sync SSH true|false, sync folder DISABLE true|false
+    :sync_ssh => false,
+    :sync_folder_disable => true,
+    # Static SSH port to make Ansible inventory even easier
+    :ssh_port => '2201',
+    # Enable or disable vbox auto_update true|false
+    :auto_update => false,
+    # Define hardware; mem/cpu
+    :memory => '2048',
+    :cpu => '1',
+    # Management NIC type
+    :mgmt_nic_type => '82540EM',
+    # Define NICs, network name/type
+    :networks => [{
+      :network_name => 'int_mgmt',
+      :nic_type => '82545EM',
+      :nic_id => '--nicpromisc2',
+      :promiscuous => 'allow-all',
+    },{
+      :network_name => 'eos_nxos1',
+      :nic_type => '82545EM',
+      :nic_id => '--nicpromisc3',
+      :promiscuous => 'allow-all',
+    },{
+      :network_name => 'eos_nxos2',
+      :nic_type => '82545EM',
+      :nic_id => '--nicpromisc4',
+      :promiscuous => 'allow-all',
+    }],
+    # Forwarded Ports
+    :fwd_ports => [{
+      :guest => 22,
+      :host => 2201,
+      :id => 'override_ssh',
+    },{
+      :guest => 444,
+      :host => 2301,
+      :id => 'EAPI'
+    }]
+  },
+  {
+    # Box, hostname for box
+    :box => "carlniger/jenkins-base",
+    :hostname => "jenkins",
+    # Sync SSH true|false, sync folder DISABLE true|false
+    :sync_ssh => false,
+    :sync_folder_disable => true,
+    # Static SSH port to make Ansible inventory even easier
+    :ssh_port => '2203',
+    # Enable or disable vbox auto_update true|false
+    :auto_update => false,
+    # Define hardware; mem/cpu
+    :memory => '1024',
+    :cpu => '1',
+    # Management NIC type
+    :mgmt_nic_type => '82540EM',
+    # Define NICs, network name/type
+    :networks => [{
+      :network_name => 'int_mgmt',
+      :nic_type => '82540EM',
+      :nic_id => '--nicpromisc2',
+      :promiscuous => 'allow-all',
+    }],
+    # Forwarded Ports
+    :fwd_ports => [{
+      :guest => 22,
+      :host => 2203,
+      :id => 'override_ssh',
+    },{
+      :guest => 8080,
+      :host => 8080,
+      :id => 'jenkins'
+    }]
+  },
+]
+
+Vagrant.configure(2) do |config|
+    # Vagrant SSH user/private key path for all nodes
+    config.ssh.username = "vagrant"
+    config.ssh.private_key_path = "~/.vagrant.d/insecure_private_key"
+
+    devices.each do |machine|
+        config.vm.define machine[:hostname] do |node|
+            # Set box name and boot timeout
+            node.vm.box = machine[:box]
+            node.vm.boot_timeout = 360
+
+            # Set config.ssh.shell -- specifically this is for NX-OS so that the shell is
+            # "run bash".
+            if machine[:ssh_shell]
+              config.ssh.shell = machine[:ssh_shell]
+            else
+              config.ssh.shell = "bash -l"
+            end
+
+            config.ssh.port = machine[:ssh_port]
+
+            # Set folder/key sync
+            node.vm.synced_folder ".", "/vagrant", disabled: [:sync_folder_disable]
+            node.ssh.insert_key = machine[:sync_ssh]
+
+            # Enable/disable auto_update per device
+            node.vbguest.auto_update = machine[:auto_update]
+
+            # If/For (private) net in networks; this is the internal to vbox switching we want to setup
+            if machine[:networks]
+              machine[:networks].each do |net|
+                node.vm.network :private_network, virtualbox__intnet: net[:network_name], auto_config: false, nic_type: net[:nic_type]
+              end
+            end
+
+            # Override default SSH port
+            node.vm.network :forwarded_port, guest: 22, host: 2222, id: "ssh", disabled: true
+            # If/For forward ports; setup appropriate NAT
+            if machine[:fwd_ports]
+              machine[:fwd_ports].each do |port|
+                node.vm.network :forwarded_port, guest: port[:guest], host: port[:host], id: port[:id]
+              end
+            end
+
+            # Setup Vbox customizations
+            node.vm.provider "virtualbox" do |vb|
+                # Set management nic type
+               vb.customize ["modifyvm", :id, "--nictype1", machine[:mgmt_nic_type]]
+
+               # Set Memory/CPU
+               vb.memory = machine[:memory]
+               vb.cpus = machine[:cpu]
+
+               # If serialport, setup serial to tcp port
+               if machine[:serialport]
+                 machine[:serialport].each do |serial|
+                   vb.customize ["modifyvm", :id, "--uartmode1", "tcpserver", serial[:serialportnum]]
+                 end
+               end
+
+                # If/For (private) net in networks; this is the internal to vbox switching we want to setup
+                if machine[:networks]
+                  machine[:networks].each do |net|
+                    vb.customize ["modifyvm", :id, net[:nic_id], net[:promiscuous]]
+                  end
+                end
+            end
+
+        end
+    end
+end

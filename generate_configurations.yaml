@@ -1,0 +1,30 @@
+---
+- name: Ensure Configs Directory Preset
+  connection: local
+  hosts: localhost
+  gather_facts: no
+  tags: always
+  tasks:
+    - file:
+        path: configs/
+        state: directory
+
+- name: Generate NXOS Configurations
+  connection: local
+  hosts: cisco-nxos
+  gather_facts: no
+  tags: nxos
+  tasks:
+    - template:
+        src=templates/cisco_nxos.j2
+        dest=configs/{{ inventory_hostname }}
+
+- name: Generate EOS Configurations
+  connection: local
+  hosts: arista-eos
+  gather_facts: no
+  tags: eos
+  tasks:
+    - template:
+        src=templates/arista_eos.j2
+        dest=configs/{{ inventory_hostname }}

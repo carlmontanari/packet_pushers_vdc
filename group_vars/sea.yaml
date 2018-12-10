@@ -1,0 +1,15 @@
+timezone: PST
+timezone_offset: 8
+timezone_summer: PDT
+
+domain_name: sea.acme.io
+name_servers:
+  - 8.8.8.8
+  - 8.8.4.4
+
+ospf_proc_id: 1
+ospf_hello: 1
+ospf_dead: 3
+
+bgp_asn: 65535
+bgp_max_paths_ibgp: 2

@@ -1,0 +1,40 @@
+---
+- name: Deploy Cisco NXOS Configurations
+  connection: local
+  hosts: cisco-nxos
+  gather_facts: no
+  tags: nxos
+  vars:
+    napalm_creds:
+      hostname: "{{ ansible_host }}"
+      username: "{{ username }}"
+      password: "{{ password }}"
+      dev_os: "{{ napalm_network_os }}"
+      optional_args:
+        port: "{{ nxapi_port }}"
+  tasks:
+    - napalm_install_config:
+        provider: "{{ napalm_creds }}"
+        config_file: "configs/{{ inventory_hostname }}"
+        commit_changes: True
+        replace_config: True
+
+- name: Deploy Arista EOS Configurations
+  connection: local
+  hosts: arista-eos
+  gather_facts: no
+  tags: eos
+  vars:
+    napalm_creds:
+      hostname: "{{ ansible_host }}"
+      username: "{{ username }}"
+      password: "{{ password }}"
+      dev_os: "{{ napalm_network_os }}"
+      optional_args:
+        port: "{{ eapi_port }}"
+  tasks:
+    - napalm_install_config:
+        provider: "{{ napalm_creds }}"
+        config_file: "configs/{{ inventory_hostname }}"
+        commit_changes: True
+        replace_config: True

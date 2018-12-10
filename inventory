@@ -1,0 +1,25 @@
+[all:vars]
+ansible_python_interpreter=/usr/bin/python3
+ssh_key_username=vagrant
+ssh_key_file=~/.vagrant.d/insecure_private_key
+username=admin
+password=P@ssw0rd
+
+[sea]
+sea-eos-1 ansible_host=10.0.1.101 ansible_port=22
+sea-nxos-1 ansible_host=10.0.1.102 ansible_port=22
+
+[arista-eos]
+sea-eos-1
+
+[arista-eos:vars]
+napalm_network_os=eos
+eapi_port=444
+
+[cisco-nxos]
+sea-nxos-1
+
+[cisco-nxos:vars]
+napalm_network_os=nxos
+nxapi_port=444
+
