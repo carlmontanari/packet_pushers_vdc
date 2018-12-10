@@ -1,4 +1,4 @@
-router_id: 10.255.255.2
+router_id: 10.255.255.1
 
 ethernet_interfaces:
   Ethernet1:
@@ -27,7 +27,7 @@ loopback_interfaces:
   Loopback0:
     description: sea-eos-1 Loopback
     routed:
-      ip: 10.255.255.2/32
+      ip: 10.255.255.1/32
 
 ospf_interfaces:
   ospf_Ethernet1:
@@ -48,8 +48,8 @@ ospf_interfaces:
 
 bgp_ipv4_unicast:
   networks:
-    - 10.255.0.2/32
+    - 10.255.255.101/32
   neighbors:
-    10.255.255.1:
+    10.255.255.2:
       remote-as: 65535
       update-source: loopback0

@@ -37,7 +37,7 @@
       nxos_command:
         provider: "{{ nxos_creds }}"
         commands:
-          - command: show ip bgp neighbors 10.255.255.2
+          - command: show ip bgp neighbors 10.255.255.1
             output: text
       register: bgp_output
       failed_when: "'BGP state = Established' not in bgp_output['stdout'][0]"
@@ -46,8 +46,8 @@
     - name: sea-nxos-1 reachability to sea-eos1
       nxos_ping:
         provider: "{{ nxos_creds }}"
-        dest: 10.255.255.2
-        source: 10.255.255.1
+        dest: 10.255.255.1
+        source: 10.255.255.2
         vrf: default
       tags: reachability
 
@@ -88,7 +88,7 @@
       eos_command:
         provider: "{{ eos_creds }}"
         commands:
-          - command: show ip bgp neighbors 10.255.255.1
+          - command: show ip bgp neighbors 10.255.255.2
             output: json
       register: bgp_output
       failed_when: "'Established' not in bgp_output['stdout'][0]['vrfs']['default']['peerList'][0]['state']"
@@ -98,7 +98,7 @@
       eos_command:
         provider: "{{ eos_creds }}"
         commands:
-          - command: ping 10.255.255.1 source 10.255.255.2
+          - command: ping 10.255.255.2 source 10.255.255.1
       tags: reachability
       register: ping_output
       failed_when: "'5 packets transmitted, 5 received' not in ping_output['stdout'][0]['messages'][0]"

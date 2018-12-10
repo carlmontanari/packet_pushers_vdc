@@ -2,7 +2,7 @@ features:
   - ospf
   - bgp
 
-router_id: 10.255.255.1
+router_id: 10.255.255.2
 
 ethernet_interfaces:
   Ethernet1/1:
@@ -32,7 +32,7 @@ loopback_interfaces:
     description: sea-nxos-1 Loopback
     state: no shutdown
     routed:
-      ip: 10.255.255.1/32
+      ip: 10.255.255.2/32
 
 ospf_interfaces:
   ospf_Ethernet1/2:
@@ -49,8 +49,8 @@ ospf_interfaces:
 
 bgp_ipv4_unicast:
   networks:
-    - 10.255.0.1/32
+    - 10.255.255.102/32
   neighbors:
-    10.255.255.2:
+    10.255.255.1:
       remote-as: 65535
       update-source: loopback0
