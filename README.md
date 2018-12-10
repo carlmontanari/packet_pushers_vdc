@@ -168,6 +168,8 @@ In general the Nexus is *very* touchy... be smart, generate a checkpoint file wi
 
 Another strange thing with the Nexus -- the base box originally had only the "internal" management and the regular management (mgmt0) ports up and configured. NAPALM config replaces failed every single time. It seems that this is because upon bringing the interface up NX-OS would create a "mac address XXXXXXX" command on the interfaces which would fail the checkpoint/rollback stuff. To work around this I simply put "no shut" and "no switchport" onto the base box. This would almost certainly be a non-issue on real gear, but was highly annoying for the virtual stuff!!
 
+I'm unsure why, but if the Nexus device doesn't come up before the other devices it seems to fail to get DHCP on the managment port, and thus Vagrant can't connect. This shouldn't matter much since Jenkins will poke the device via the internal networks, but it is annoying!
+
 # Issues/Questions
 
 Please feel free to open an issue if you've got any issues/questions. I probably won't do much anything else with this, but will try to assist with anything that pops up for folks time permitting!
