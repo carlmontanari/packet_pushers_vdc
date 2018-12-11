@@ -164,7 +164,7 @@ Click on "Console Output" on the left side of the screen to take a look at what'
 
 I'll start by saying: RTFM! I've spent far far far too much time hacking at things when I could have read the manual!
 
-In general the Nexus is *very* touchy... be smart, generate a checkpoint file wiht NAPALM and then modify that and test as you go to make sure the config replace still works as you would want it to. If you are ok with "merge" efforts the Nexus is much much less difficult.
+In general the Nexus is *very* touchy... be smart, generate a checkpoint file with NAPALM and then modify that and test as you go to make sure the config replace still works as you would want it to. If you are ok with "merge" efforts the Nexus is much much less difficult.
 
 Another strange thing with the Nexus -- the base box originally had only the "internal" management and the regular management (mgmt0) ports up and configured. NAPALM config replaces failed every single time. It seems that this is because upon bringing the interface up NX-OS would create a "mac address XXXXXXX" command on the interfaces which would fail the checkpoint/rollback stuff. To work around this I simply put "no shut" and "no switchport" onto the base box. This would almost certainly be a non-issue on real gear, but was highly annoying for the virtual stuff!!
 
