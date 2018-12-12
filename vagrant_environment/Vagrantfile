@@ -20,7 +20,7 @@ devices=[
       :serialportnum => "2002",
     }],
     # Define hardware; mem/cpu
-    :memory => '6142',
+    :memory => '6144',
     :cpu => '1',
     # Management NIC type
     :mgmt_nic_type => '82540EM',
