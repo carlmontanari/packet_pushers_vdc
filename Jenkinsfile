@@ -54,7 +54,7 @@ pipeline {
                     if (result > 0) {
                         sh 'ansible-playbook rollback_configurations.yaml'
                         currentBuild.result = 'ABORTED'
-                        error('Integration testing FAILED')
+                        error('Functional testing FAILED')
                     }
                 }
             }
