@@ -31,7 +31,7 @@ loopback_interfaces:
   Loopback1:
     description: sea-eos-1 Loopback for Demo!
     routed:
-      ip: 10.255.1.1/32
+      ip: 10.255.1.256/32
 
 ospf_interfaces:
   ospf_Ethernet1:
