@@ -51,14 +51,6 @@
         vrf: default
       tags: reachability
 
-    - name: sea-nxos-1 reachability to sea-eos1 new Loopback
-      nxos_ping:
-        provider: "{{ nxos_creds }}"
-        dest: 10.255.1.1
-        source: 10.255.255.2
-        vrf: default
-      tags: reachability
-
 - name: Validate sea-eos-1
   connection: local
   hosts: sea-eos-1
