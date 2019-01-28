@@ -4,6 +4,8 @@
 
 Hello! This repository was created to accompany my Packet Pushers Virtual Design Clinic 3 presentation on "CI/CD for Networking". The intent of this repo is to allow you to simply "vagrant up" the environment used for the demo, so you can get into using Ansible, NAPALM-Ansible, some Python, and Jenkins right away.
 
+You can check out the recording of this by being a member of Ignition at Packet Pushers, or you can check out this follow up video I posted on YouTube to see what its all about: (Click Me!)[https://www.youtube.com/watch?v=_O6UTUTh9so&t=1s]
+
 In this repository you will find a Vagrantfile which describes the multi-machine vagrant environment used for the demo. This includes a Cisco Nexus 9000v instance, an Arista vEOS instance, and an Ubuntu Server instance running Jenkins.
 
 Each of these instances has some "base" configuration in order to get things bootstrapped nice and quickly for us.
